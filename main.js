@@ -32,9 +32,7 @@
             return;
         }
 
-        for (let i = 0; i < output.children.length; i++) {
-            const card = output.children[i];
-
+        for (const card of output.children) {
             card.classList.remove('opened');
             card.querySelector('.card__inner')?.remove();
         }
