@@ -85,12 +85,12 @@
                 Ошибка: ${data.fetchError.message}.
                 Проверьте соединение или попробуйте позже
             `;
-
             return;
         }
 
         if (!data._embedded.leads.length) {
             output.textContent = 'Нет карточек для отображения';
+            return;
         }
 
         data._embedded.leads.forEach(lead => {
@@ -115,7 +115,7 @@
         targetElem.append(getInnerCardElement(cardDetails));
     }
 
-    function getCardElement({ id, name, price }) {
+    function getCardElement({ id, name, price } = {}) {
         const cloneTmpl = tmpl.content.cloneNode(true);
 
         cloneTmpl.querySelector('.card').dataset.id = id;
@@ -136,7 +136,7 @@
             : taskDeadline - currentDay < 0 ? 'firebrick' : 'gold';
     }
 
-    function getInnerCardElement({ id, name, ...lead }) {
+    function getInnerCardElement({ id, name, ...lead } = {}) {
         const cloneTmpl = innerTmpl.content.cloneNode(true);
 
         const cloneTmplWrapper = cloneTmpl.querySelector('.card__inner');
@@ -149,7 +149,6 @@
             cloneTmplId.textContent = `
                 Нет связи с сервером или карточки больше не существует.
             `;
-
             return cloneTmpl;
         }
 
