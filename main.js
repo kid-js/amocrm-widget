@@ -9,7 +9,7 @@
     const requestDelay = 1000;
 
     if (!button || !output || !tmpl || !innerTmpl) {
-        console.error('Отсутствуют необходимые элементы в дом дереве');
+        console.error('Отсутствуют необходимые элементы в DOM-дереве');
         return;
     }
 
@@ -19,7 +19,7 @@
         button.hidden = true;
 
         initLoader(output, 'data-loader-outer');
-        await renderCards();
+        await renderCards({ target: 'leads' });
 
         output.addEventListener('click', handleCardClick);
     }
@@ -54,20 +54,22 @@
         });
     }
 
-    async function getData({ page = 1, id } = {}) {
-        const apiRequest = '/api/v4/leads'
-            + (id ? `/${id}` : `?limit=${itemsLimit}&page=${page}`);
+    async function getData(options = {}) {
+        const requests = {
+            leads: `/api/v4/leads?limit=${itemsLimit}&page=${options.page || 1}`,
+            lead: `/api/v4/leads/${options.id || 0}`,
+        };
 
-        const options = {
+        const fetchOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain; charset=UTF-8',
             },
-            body: apiRequest,
+            body: requests[options.target],
         }
 
         try {
-            const res = await fetch('api.php', options);
+            const res = await fetch('api.php', fetchOptions);
             const data = await res.json();
 
             return data;
@@ -101,16 +103,18 @@
             const url = new URL(data._links.next.href);
             const nextPage = url.searchParams.get('page');
 
-            setTimeout(() => renderCards({ page: nextPage }), requestDelay);
+            setTimeout(() => {
+                renderCards({ target: 'leads', page: nextPage });
+            }, requestDelay);
         }
         else {
             destroyLoader('data-loader-outer');
         }
     }
-    async function renderInnerCard(target, id) {
-        const cardDetails = await getData({ id });
+    async function renderInnerCard(targetElem, id) {
+        const cardDetails = await getData({ id, target: 'lead' });
 
-        target.append(getInnerCardElement(cardDetails));
+        targetElem.append(getInnerCardElement(cardDetails));
     }
 
     function getCardElement({ id, name, price }) {
@@ -165,12 +169,12 @@
         return cloneTmpl;
     }
 
-    function initLoader(target, dataAttr) {
+    function initLoader(targetElem, dataAttr) {
         const tmpl = document.querySelector('#loader-template');
         const cloneTmpl = tmpl.content.cloneNode(true);
 
         cloneTmpl.querySelector('.loader-wrapper').setAttribute(dataAttr, '');
-        target.append(cloneTmpl);
+        targetElem.append(cloneTmpl);
     }
 
     function destroyLoader(dataAttr) {
