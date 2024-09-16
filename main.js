@@ -93,9 +93,13 @@
             return;
         }
 
+        const fragment = document.createDocumentFragment();
+
         data._embedded.leads.forEach(lead => {
-            output.append(getCardElement(lead));
+            fragment.append(getCardElement(lead));
         });
+
+        output.append(fragment);
 
         if (data._links.next) {
             const url = new URL(data._links.next.href);
@@ -109,6 +113,7 @@
             destroyLoader('data-loader-outer');
         }
     }
+
     async function renderInnerCard(targetElem, id) {
         const cardDetails = await getData({ id, target: 'lead' });
 
